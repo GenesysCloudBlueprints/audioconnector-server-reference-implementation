@@ -16,7 +16,7 @@ The [DTMFService](./src/services/dtmf-service.ts) class is responsible for inter
 
 The [SecretService](./src/services/secret-service.ts) class is responsible for looking up the secret from a given API Key used during the initial authentication process. A fake implementation has been provided, and will need to be replaced to lookup secrets with whatever service they are stored in.
 
-The [TTSService](./src/services/tts-service.ts) class is responsible for converting text-based responses from the Bot to the appropriate audio to be sent to the AudioConnector Client. A fake implementation has been provided, and will need to be replaces with an actial TTS engine.
+The [TTSService](./src/services/tts-service.ts) class is responsible for converting text-based responses from the Bot to the appropriate audio to be sent to the AudioConnector Client. A fake implementation has been provided, and will need to be replaces with an actual TTS engine.
 
 ### Running the server
 

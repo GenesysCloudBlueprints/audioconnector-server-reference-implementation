@@ -19,10 +19,6 @@ import {
     EventEntityBargeIn,
     EventEntityBotTurnResponse
 } from '../protocol/voice-bots';
-import {
-    EventEntityDataTranscript,
-    EventEntityTranscript
-} from '../protocol/entities-transcript';
 import { MessageHandlerRegistry } from '../websocket/message-handlers/message-handler-registry';
 import {
     BotService,
@@ -190,38 +186,6 @@ export class Session {
         this.send(message);
     }
 
-    sendTranscript(transcript: string, confidence: number, isFinal: boolean) {
-        const channel = this.selectedMedia?.channels[0];
-
-        if (channel) {
-            const parameters: EventEntityDataTranscript = {
-                id: uuid(),
-                channel,
-                isFinal,
-                alternatives: [
-                    {
-                        confidence,
-                        interpretations: [
-                            {
-                                type: 'normalized',
-                                transcript
-                            }
-                        ]
-                    }
-                ]
-            };
-            const transcriptEvent: EventEntityTranscript = {
-                type: 'transcript',
-                data: parameters
-            };
-            const message = this.createMessage('event', {
-                entities: [transcriptEvent]
-            } as SelectParametersForType<'event', EventParameters>);
-    
-            this.send(message);
-        }
-    }
-
     sendDisconnect(reason: DisconnectReason, info: string, outputVariables: JsonStringMap) {
         this.disconnecting = true;
         
@@ -326,19 +290,10 @@ export class Session {
                     console.log(`${message}: ${error}`);
                     this.sendDisconnect('error', message, {});
                 })
-                .on('transcript', (transcript: Transcript) => {
-                    if (this.isCapturingDTMF) {
-                        return;
-                    }
-
-                    this.sendTranscript(transcript.text, transcript.confidence, false);
-                })
                 .on('final-transcript', (transcript: Transcript) => {
                     if (this.isCapturingDTMF) {
                         return;
                     }
-
-                    this.sendTranscript(transcript.text, transcript.confidence, true);
                     
                     this.selectedBot?.getBotResponse(transcript.text)
                         .then((response: BotResponse) => {
@@ -398,8 +353,6 @@ export class Session {
                     this.sendDisconnect('error', message, {});
                 })
                 .on('final-digits', (digits) => {
-                    this.sendTranscript(digits, 1.0, true);
-                    
                     this.selectedBot?.getBotResponse(digits)
                         .then((response: BotResponse) => {
                             if (response.text) {
